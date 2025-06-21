@@ -9,9 +9,9 @@
         body {
             font-family: 'Noto Sans KR', sans-serif;
             text-align: center;
-            padding: 50px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            color: #495057;
             min-height: 100vh;
             margin: 0;
             display: flex;
@@ -19,21 +19,43 @@
             justify-content: center;
         }
         .container {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.95);
             padding: 40px;
             border-radius: 20px;
             backdrop-filter: blur(10px);
             box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid rgba(0,0,0,0.1);
         }
-        h1 { margin-bottom: 20px; }
+        h1 { 
+            margin-bottom: 20px; 
+            font-size: 1.8em;
+            color: #2c3e50;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .thumbnail-container {
+            margin: 20px auto;
+            min-height: 200px; /* 로딩 중 공간 유지 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .bulletin-thumbnail {
+            width: 200px;
+            max-height: 280px;
+            object-fit: contain;
+            border: 1px solid #ddd; /* 얇은 테두리 추가 */
+        }
         .loading {
             display: inline-block;
             width: 20px;
             height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
+            border: 3px solid rgba(52, 152, 219, 0.3);
             border-radius: 50%;
-            border-top-color: #fff;
+            border-top-color: #3498db;
             animation: spin 1s ease-in-out infinite;
+            margin: 0 10px;
         }
         @keyframes spin {
             to { transform: rotate(360deg); }
@@ -41,30 +63,53 @@
         .manual-link {
             margin-top: 30px;
             padding: 15px 30px;
-            background: rgba(255,255,255,0.2);
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
             border-radius: 10px;
             text-decoration: none;
             color: white;
             display: inline-block;
             transition: all 0.3s ease;
+            border: none;
+            font-weight: 500;
         }
         .manual-link:hover {
-            background: rgba(255,255,255,0.3);
+            background: linear-gradient(135deg, #2980b9 0%, #1f5f8b 100%);
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+        .status-text {
+            font-size: 1.1em;
+            margin: 15px 0;
+            color: #6c757d;
+        }
+        .redirect-info {
+            font-size: 0.9em;
+            color: #868e96;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🏛️ 높은뜻씨앗이되어교회</h1>
-        <p>최신 주보로 이동 중입니다...</p>
+        <h1>높은뜻씨앗이되어교회</h1>
+        <p class="status-text">최신 주보로 이동 중입니다...</p>
+        
+        <div class="thumbnail-container">
+            <img src="assets/static_thumbnail.jpg" alt="높은뜻씨앗이되어교회 주보" class="bulletin-thumbnail">
+        </div>
+        
         <div class="loading"></div>
+        
         <div style="margin-top: 30px;">
             <a href="https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly&wr_id=732" 
                class="manual-link">
-                📋 최신 주보로 이동
+                최신 주보로 이동
             </a>
         </div>
+        
+        <p class="redirect-info">
+            자동으로 이동되지 않는 경우 위 버튼을 클릭해주세요
+        </p>
     </div>
     <script>
         // 즉시 최신 주보로 리다이렉트

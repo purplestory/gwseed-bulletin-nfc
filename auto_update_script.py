@@ -1,73 +1,57 @@
 #!/usr/bin/env python3
 """
 정기적으로 최신 주보를 확인하고 자동으로 업데이트하는 스크립트
-매주 일요일 오전 9시에 실행되도록 cron job 설정
 """
 
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 import re
-import json
-import os
 from datetime import datetime
 import subprocess
+import os
 
-def get_latest_bulletin():
-    """교회 웹사이트에서 최신 주보 정보 가져오기"""
+def get_latest_bulletin_id():
+    """교회 웹사이트에서 최신 주보 wr_id 가져오기"""
     try:
-        url = "https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly"
+        list_url = "https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly"
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
         }
         
-        response = requests.get(url, headers=headers, timeout=10)
+        response = requests.get(list_url, headers=headers, timeout=10)
         response.raise_for_status()
-        
         soup = BeautifulSoup(response.text, 'html.parser')
         
-        # 최신 주보 링크 찾기
-        all_links = soup.find_all('a', href=True)
-        weekly_links = []
+        latest_link_tag = soup.find('a', href=lambda href: isinstance(href, str) and 'wr_id=' in href and 'weekly' in href)
         
-        for link in all_links:
-            href = str(link.get('href', ''))
-            if 'wr_id=' in href and 'weekly' in href:
-                weekly_links.append(href)
+        if not isinstance(latest_link_tag, Tag):
+            print("최신 주보 링크를 찾을 수 없습니다.")
+            return None
+
+        post_url = str(latest_link_tag.get('href', ''))
+        wr_id_match = re.search(r'wr_id=(\d+)', post_url)
         
-        if weekly_links:
-            latest_link = weekly_links[0]
-            if not latest_link.startswith('http'):
-                latest_link = "https://www.godswillseed.or.kr" + latest_link
-            
-            # wr_id 추출
-            wr_id_match = re.search(r'wr_id=(\d+)', latest_link)
-            wr_id = wr_id_match.group(1) if wr_id_match else None
-            
-            return {
-                'url': latest_link,
-                'wr_id': wr_id,
-                'timestamp': datetime.now().isoformat()
-            }
+        if wr_id_match:
+            return wr_id_match.group(1)
         
         return None
         
     except Exception as e:
-        print(f"최신 주보 정보 가져오기 실패: {e}")
+        print(f"최신 주보 ID 가져오기 실패: {e}")
         return None
 
 def update_index_html(wr_id):
     """index.html 파일에서 wr_id 업데이트"""
     try:
-        # index.html 파일 읽기
         with open('index.html', 'r', encoding='utf-8') as f:
             content = f.read()
         
-        # wr_id 업데이트
-        old_pattern = r'wr_id=\d+'
-        new_url = f'wr_id={wr_id}'
-        updated_content = re.sub(old_pattern, new_url, content)
+        updated_content = re.sub(r'wr_id=\d+', f'wr_id={wr_id}', content)
         
-        # 파일에 저장
+        if content == updated_content:
+            print("🔄 index.html에 변경할 내용이 없습니다.")
+            return False # 변경사항 없음
+
         with open('index.html', 'w', encoding='utf-8') as f:
             f.write(updated_content)
         
@@ -81,9 +65,13 @@ def update_index_html(wr_id):
 def git_commit_and_push():
     """변경사항을 Git에 커밋하고 푸시"""
     try:
-        # Git 명령어 실행
+        subprocess.run(['git', 'config', '--local', 'user.email', 'action@github.com'], check=True)
+        subprocess.run(['git', 'config', '--local', 'user.name', 'GitHub Action'], check=True)
+        
         subprocess.run(['git', 'add', 'index.html'], check=True)
-        subprocess.run(['git', 'commit', '-m', f'Auto update latest bulletin - {datetime.now().strftime("%Y-%m-%d %H:%M")}'], check=True)
+        
+        commit_message = f'Auto update latest bulletin wr_id - {datetime.now().strftime("%Y-%m-%d %H:%M")}'
+        subprocess.run(['git', 'commit', '-m', commit_message], check=True)
         subprocess.run(['git', 'push'], check=True)
         
         print("✅ Git 커밋 및 푸시 완료")
@@ -97,21 +85,16 @@ def main():
     """메인 실행 함수"""
     print(f"🔄 최신 주보 확인 시작: {datetime.now()}")
     
-    # 최신 주보 정보 가져오기
-    latest_info = get_latest_bulletin()
+    latest_wr_id = get_latest_bulletin_id()
     
-    if latest_info:
-        print(f"📋 최신 주보 발견: wr_id={latest_info['wr_id']}")
+    if latest_wr_id:
+        print(f"📋 최신 주보 발견: wr_id={latest_wr_id}")
         
-        # index.html 업데이트
-        if update_index_html(latest_info['wr_id']):
-            # Git 커밋 및 푸시
+        if update_index_html(latest_wr_id):
             if git_commit_and_push():
                 print("🎉 자동 업데이트 완료!")
             else:
                 print("⚠️ Git 푸시 실패")
-        else:
-            print("❌ 파일 업데이트 실패")
     else:
         print("❌ 최신 주보 정보를 가져올 수 없습니다")
 
