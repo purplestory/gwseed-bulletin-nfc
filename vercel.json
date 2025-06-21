@@ -2,22 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "nfc_redirect.py",
-      "use": "@vercel/python"
+      "src": "*.html",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/nfc_redirect.py"
+      "dest": "/index.html"
     }
-  ],
-  "env": {
-    "PYTHONPATH": "."
-  },
-  "functions": {
-    "nfc_redirect.py": {
-      "maxDuration": 30
-    }
-  }
+  ]
 } 
