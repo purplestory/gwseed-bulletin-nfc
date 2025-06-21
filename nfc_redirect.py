@@ -13,10 +13,15 @@ def get_latest_bulletin_url():
         
         # 페이지 요청
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'ko-KR,ko;q=0.8,en-US;q=0.5,en;q=0.3',
+            'Accept-Encoding': 'gzip, deflate',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
         }
         
-        response = requests.get(base_url, headers=headers, timeout=10)
+        response = requests.get(base_url, headers=headers, timeout=15)
         response.raise_for_status()
         
         # HTML 파싱
@@ -35,14 +40,15 @@ def get_latest_bulletin_url():
         
     except Exception as e:
         print(f"최신 주보 URL 가져오기 실패: {e}")
-        return None
+        # 실패 시 기본 주보 게시판으로 리다이렉트
+        return "https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly"
 
 @app.route('/')
 def nfc_redirect():
     """NFC 태그로 접근 시 최신 주보로 리다이렉트"""
     latest_url = get_latest_bulletin_url()
     
-    if latest_url:
+    if latest_url and latest_url != "https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly":
         return redirect(latest_url, code=302)
     else:
         return """
