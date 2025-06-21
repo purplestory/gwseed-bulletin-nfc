@@ -5,11 +5,14 @@ import os
 
 app = Flask(__name__)
 
-# 최신 주보 URL (수동 관리)
-LATEST_BULLETIN_URL = "https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly&wr_id=732"
+# 환경 변수에서 최신 주보 URL 가져오기 (기본값: wr_id=732)
+LATEST_BULLETIN_URL = os.environ.get(
+    'LATEST_BULLETIN_URL', 
+    "https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly&wr_id=732"
+)
 
 def get_latest_bulletin_url():
-    """저장된 최신 주보 URL을 가져옴 (API 실패 시 기본값 사용)"""
+    """저장된 최신 주보 URL을 가져옴 (API 실패 시 환경 변수 사용)"""
     try:
         # 현재 도메인에서 API 호출
         base_url = request.host_url.rstrip('/')
@@ -28,7 +31,7 @@ def get_latest_bulletin_url():
     except Exception as e:
         print(f"API 호출 실패: {e}")
     
-    # API 실패 시 기본값 반환
+    # API 실패 시 환경 변수 값 반환
     return LATEST_BULLETIN_URL
 
 @app.route('/')
@@ -43,7 +46,8 @@ def health_check():
     return {
         "status": "healthy", 
         "service": "nfc_redirect",
-        "latest_bulletin": LATEST_BULLETIN_URL
+        "latest_bulletin": LATEST_BULLETIN_URL,
+        "environment": "production" if os.environ.get('VERCEL') else "local"
     }
 
 @app.route('/update/<int:wr_id>')
@@ -64,7 +68,8 @@ def update_latest_bulletin(wr_id):
     return {
         "status": "updated",
         "new_url": new_url,
-        "message": f"최신 주보가 wr_id={wr_id}로 업데이트되었습니다."
+        "message": f"최신 주보가 wr_id={wr_id}로 업데이트되었습니다.",
+        "note": "환경 변수도 함께 업데이트하는 것을 권장합니다."
     }
 
 if __name__ == '__main__':
