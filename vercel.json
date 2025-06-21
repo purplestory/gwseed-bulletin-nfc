@@ -4,9 +4,17 @@
     {
       "src": "nfc_redirect.py",
       "use": "@vercel/python"
+    },
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
     {
       "src": "/(.*)",
       "dest": "nfc_redirect.py"
@@ -19,5 +27,11 @@
     "nfc_redirect.py": {
       "maxDuration": 30
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/update-latest",
+      "schedule": "0 9 * * 0"
+    }
+  ]
 } 
