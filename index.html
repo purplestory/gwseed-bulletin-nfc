@@ -37,7 +37,7 @@
         }
         .thumbnail-container {
             margin: 20px auto;
-            min-height: 200px; /* 로딩 중 공간 유지 */
+            min-height: 100px; /* 로딩 중 공간 유지 */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -93,7 +93,7 @@
 <body>
     <div class="container">
         <h1>높은뜻씨앗이되어교회</h1>
-        <p class="status-text">최신 주보로 이동 중입니다...</p>
+        <p class="status-text">이번주 주보로 이동 중입니다...</p>
         
         <div class="thumbnail-container">
             <img src="assets/static_thumbnail.jpg" alt="높은뜻씨앗이되어교회 주보" class="bulletin-thumbnail">
@@ -104,7 +104,7 @@
         <div style="margin-top: 30px;">
             <a href="https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly&wr_id=732" 
                class="manual-link">
-                최신 주보로 이동
+                이번주 주보로 이동
             </a>
         </div>
         
@@ -113,10 +113,10 @@
         </p>
     </div>
     <script>
-        // 0.5초 후에 최신 주보로 리다이렉트
+        // 0.1초 후에 이번주 주보로 리다이렉트
         setTimeout(function() {
             window.location.href = 'https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly&wr_id=732';
-        }, 500);
+        }, 100);
     </script>
 </body>
 </html> 
