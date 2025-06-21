@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}OCR 수정 - {{ post.title }} - 높은뜻씨앗이되어교회{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">
+                        <i class="bi bi-pencil-square"></i> OCR 데이터 수정
+                    </h3>
+                    <div>
+                        <a href="{{ url_for('admin_logout') }}" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-box-arrow-right"></i> 로그아웃
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h5>{{ post.title }}</h5>
+                            <p class="text-muted">
+                                <i class="bi bi-calendar"></i> {{ post.created_at }}<br>
+                                <i class="bi bi-person"></i> {{ post.author }}
+                            </p>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <a href="{{ url_for('post', post_id=post.id) }}" class="btn btn-secondary">
+                                <i class="bi bi-eye"></i> 원본 보기
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('admin_save', post_id=post.id) }}">
+                        <div class="mb-3">
+                            <label for="ocr_data" class="form-label">OCR 추출 텍스트</label>
+                            <textarea class="form-control" id="ocr_data" name="ocr_data" rows="30" style="font-family: 'Courier New', monospace; font-size: 14px;">{{ post.ocr_data or '' }}</textarea>
+                            <div class="form-text">
+                                OCR에서 잘못 인식된 텍스트를 수정하세요. 줄바꿈은 그대로 유지됩니다.
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('post', post_id=post.id) }}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> 취소
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> 저장
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+#ocr_data {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+</style>
+{% endblock %} 

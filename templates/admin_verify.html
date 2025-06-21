@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}관리자 인증 - 높은뜻씨앗이되어교회{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="bi bi-shield-lock"></i> 관리자 인증
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                    
+                    <p class="text-muted">OCR 데이터를 수정하려면 관리자 비밀번호를 입력하세요.</p>
+                    
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="password" class="form-label">관리자 비밀번호</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> 확인
+                            </button>
+                            <a href="{{ url_for('post', post_id=post_id) }}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> 돌아가기
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>{% block title %}높은뜻씨앗이되어교회 주보{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        html, body {
+            overscroll-behavior: none; /* 브라우저 기본 스와이프 동작 방지 */
+        }
+        
+        :root {
+            --bs-gutter-x: 0.5rem;  /* 기본 1.5rem에서 0.5rem으로 줄임 */
+            --bs-gutter-y: 0;       /* 세로 간격은 0으로 유지 */
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .post-card {
+            transition: transform 0.2s;
+            margin-bottom: 20px;
+        }
+        .post-card:hover {
+            transform: translateY(-5px);
+        }
+        .post-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .post-content {
+            white-space: pre-wrap;
+        }
+        .carousel {
+            position: relative;
+            overflow: hidden;
+        }
+        .carousel-inner {
+            position: relative;
+            min-height: 1px;
+            margin-bottom: 12px;
+        }
+        .carousel-item {
+            display: none;
+        }
+        .carousel-item.active {
+            display: block;
+        }
+        .carousel-item img {
+            width: 100%;
+            height: 100%;
+            /* max-height: 90vh; */
+            object-fit: contain;
+            opacity: 1;
+            transition: transform 0.3s ease;
+            cursor: pointer !important; /* 모든 상태에서 pointer 커서 유지 */
+            transform-origin: center center;
+        }
+        .carousel-item img.zoomed {
+            cursor: zoom-out;
+            max-width: none;
+            max-height: none;
+        }
+        /* @media (max-width: 768px) {
+            .post-image {
+                height: 150px;
+            }
+            .carousel-item img {
+                max-height: 70vh;
+            }
+        } */
+        .carousel-control-prev,
+        .carousel-control-next {
+            background-color: transparent;
+            width: auto;
+            height: auto;
+            border-radius: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+        }
+        .carousel-control-prev {
+            left: 10px;
+        }
+        .carousel-control-next {
+            right: 10px;
+        }
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            background-color: transparent !important;
+            border-radius: 0 !important;
+            width: 2rem !important;
+            height: 2rem !important;
+            display: block !important;
+            filter: drop-shadow(0 0 2px #000);
+        }
+        .carousel-indicators {
+            position: static !important;
+            text-align: center;
+            margin-top: 0 !important;
+            margin-bottom: 0;
+            z-index: 2;
+            min-height: 24px;
+            background: none !important;
+            padding-bottom: 8px;
+        }
+        .carousel-indicators button {
+            width: 30px !important;
+            height: 3px !important;
+            border-radius: 0 !important;
+            margin: 0 2px !important;
+            background-color: rgba(0, 0, 0, 0.15) !important;
+            border: none !important;
+            transition: background-color 0.2s;
+        }
+        .carousel-indicators button.active {
+            background-color: rgba(0, 0, 0, 0.7) !important;
+        }
+        .image-frame {
+            width: 100%;
+            aspect-ratio: 1 / 1.414;
+            height: auto;
+            margin: 0 auto 0px auto;
+            background: #fff;
+            border-radius: 0;
+            overflow: hidden;
+            position: relative;
+        }
+        .image-frame .carousel-inner,
+        .image-frame .carousel-item {
+            width: 100%;
+            height: 100%;
+            /* display: flex; */
+            /* align-items: center; */
+            /* justify-content: center; */
+        }
+        .image-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #fff;
+        }
+        .carousel.slide {
+            width: 100%;
+            height: 100%;
+            border: 0px solid #eee;
+            border-radius: 0;
+            box-sizing: border-box;
+        }
+        .carousel-inner {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* 썸네일 네비게이션 스타일 */
+        .thumbnail-navigation {
+            margin: 8px auto;
+            text-align: center;
+        }
+        
+        .thumbnail-container {
+            display: inline-flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 4px 12px;
+            scrollbar-width: thin;
+            scrollbar-color: #adb5bd #f8f9fa;
+            justify-content: center;
+        }
+        
+        .thumbnail-container::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .thumbnail-container::-webkit-scrollbar-track {
+            background: #f8f9fa;
+            border-radius: 3px;
+        }
+        
+        .thumbnail-container::-webkit-scrollbar-thumb {
+            background: #adb5bd;
+            border-radius: 3px;
+        }
+        
+        .thumbnail-container::-webkit-scrollbar-thumb:hover {
+            background: #6c757d;
+        }
+        
+        /* OCR 텍스트 영역의 마크다운 헤더 스타일 */
+        .ocr-text h1 {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 0.5rem;
+        }
+        
+        .ocr-text h2 {
+            font-size: 1.75rem;
+            font-weight: bold;
+            color: #34495e;
+            margin-top: 1.25rem;
+            margin-bottom: 0.75rem;
+            border-bottom: 2px solid #e74c3c;
+            padding-bottom: 0.25rem;
+        }
+        
+        .ocr-text h3 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            background-color: #ecf0f1;
+            padding: 0.5rem;
+            border-left: 4px solid #3498db;
+        }
+        
+        .ocr-text h4 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #34495e;
+            margin-top: 0.75rem;
+            margin-bottom: 0.5rem;
+            background-color: #f8f9fa;
+            padding: 0.25rem 0.5rem;
+            border-left: 3px solid #e74c3c;
+        }
+        
+        .ocr-text h5 {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #7f8c8d;
+            margin-top: 0.5rem;
+            margin-bottom: 0.25rem;
+            border-left: 2px solid #95a5a6;
+            padding-left: 0.5rem;
+        }
+        
+        .ocr-text h6 {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #95a5a6;
+            margin-top: 0.5rem;
+            margin-bottom: 0.25rem;
+            font-style: italic;
+        }
+        
+        .thumbnail-item {
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            height: 80px; /* 고정 높이 */
+            flex-shrink: 0; /* 아이템이 수축되지 않도록 설정 */
+        }
+        
+        .thumbnail-item:hover {
+            transform: translateY(-2px);
+        }
+        
+        .thumbnail-item.active .thumbnail-img {
+            box-shadow: 0 0 0 1px #0d6efd;
+        }
+        
+        .thumbnail-img {
+            height: 100%;
+            width: auto;
+            object-fit: contain;
+            display: block;
+            border-radius: 0;
+            box-shadow: none;
+            border: 1px solid #eee; /* 얇고 흐린 테두리 */
+        }
+        
+        @media (max-width: 768px) {
+            .thumbnail-item {
+                height: 70px;
+            }
+            .thumbnail-container {
+                gap: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .thumbnail-item {
+                height: 60px;
+            }
+             .thumbnail-container {
+                gap: 8px;
+            }
+        }
+        .zoom-tooltip {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none; /* 툴크이 마우스 이벤트를 방해하지 않도록 설정 */
+        }
+
+        .zoom-tooltip.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container-fluid d-flex align-items-center">
+            <!-- 왼쪽 공간 -->
+            <div style="flex: 1;"></div>
+            
+            <!-- 가운데 (타이틀) -->
+            <div class="navbar-nav mx-auto text-center">
+                {% if bulletin_title %}
+                <h1 class="card-title m-0 text-white" style="font-size:1.3rem;">{{ bulletin_title }}</h1>
+                {% elif bulletin_date %}
+                <span class="navbar-text text-white">{{ bulletin_date }} 주보</span>
+                {% else %}
+                 <a class="navbar-brand" href="/">높은뜻씨앗이되어교회</a>
+                {% endif %}
+            </div>
+        
+            <!-- 오른쪽 공간 -->
+            <div style="flex: 1;"></div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-0 mb-4" style="padding-top: 50px;">
+        <!-- Flash 메시지 표시 영역 -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="container-fluid mt-2">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // OS의 기본 핀치 줌을 확실하게 막기 위해 document 레벨에서 이벤트 리스너 추가
+    document.addEventListener('touchmove', function(event) {
+        if (event.touches.length > 1) {
+            event.preventDefault();
+        }
+    }, { passive: false });
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        const tooltip = document.querySelector('.zoom-tooltip');
+        if (tooltip && isMobile) {
+            tooltip.innerHTML = '더블탭 또는 핀치로 확대/축소';
+        }
+
+        var carousel = document.getElementById('weeklyCarousel');
+        if (!carousel) return;
+
+        // Bootstrap 캐러셀 완전 제거
+        var bootstrapCarousel = bootstrap.Carousel.getInstance(carousel);
+        if (bootstrapCarousel) {
+            bootstrapCarousel.dispose();
+        }
+
+        var images = carousel.querySelectorAll('.carousel-item img');
+        var carouselItems = carousel.querySelectorAll('.carousel-item');
+        var currentIndex = 0;
+
+        // 이미지 프리로딩
+        function preloadImages() {
+            images.forEach(function(img) {
+                var preloadImg = new Image();
+                preloadImg.src = img.src;
+            });
+        }
+
+        function setFrameAspect(img) {
+            if (!img) return;
+            var frame = document.querySelector('.image-frame');
+            var w = img.naturalWidth;
+            var h = img.naturalHeight;
+            if (w && h) {
+                frame.style.aspectRatio = w + ' / ' + h;
+            }
+        }
+
+        // 수동 캐러셀 초기화
+        function showSlide(index) {
+            carouselItems.forEach((item, i) => {
+                if (i === index) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+            var activeImg = carouselItems[index].querySelector('img');
+            if (activeImg) {
+                activeImg.style.transform = '';
+                activeImg.classList.remove('zoomed');
+                if (activeImg.complete) {
+                    setFrameAspect(activeImg);
+                } else {
+                    activeImg.onload = function() { setFrameAspect(activeImg); };
+                }
+            }
+            
+            // 썸네일 상태 업데이트
+            var thumbnailItems = document.querySelectorAll('.thumbnail-item');
+            thumbnailItems.forEach((item, i) => {
+                if (i === index) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+            
+            currentIndex = index;
+        }
+
+        // 더블탭 확대 기능 + 드래그 이동 (PC/모바일 통합 최종 수정본)
+        function setupImageZoom() {
+            let tooltipTimeout;
+
+            images.forEach(function(img) {
+                // --- 상태 변수 ---
+                let scale = 1, translateX = 0, translateY = 0;
+                const zoomLevels = [1, 2, 4];
+                let currentZoomLevel = 0;
+                let isDragging = false, isPinching = false;
+                let dragStart = { x: 0, y: 0 };
+                let touchStartPos = { x: 0, y: 0 }; // 모바일 탭/드래그 구분용
+                let lastTap = 0;
+                let hasHovered = false;
+                
+                // 핀치 줌 관련 변수 추가
+                let initialPinchDistance = 0;
+                let initialPinchScale = 1;
+                let pinchCenter = { x: 0, y: 0 };
+
+                // --- 유틸리티 함수 (변경 없음) ---
+                function getRenderedImageInfo() {
+                    const frameRect = img.closest('.image-frame').getBoundingClientRect();
+                    const frameW = frameRect.width, frameH = frameRect.height;
+                    const imgW = img.naturalWidth, imgH = img.naturalHeight;
+                    if (!imgW || !imgH) return null;
+                    const frameRatio = frameW / frameH, imgRatio = imgW / imgH;
+                    let renderW, renderH, offsetLeft, offsetTop;
+                    if (imgRatio > frameRatio) {
+                        renderW = frameW; renderH = frameW / imgRatio;
+                        offsetLeft = 0; offsetTop = (frameH - renderH) / 2;
+                    } else {
+                        renderH = frameH; renderW = frameH * imgRatio;
+                        offsetTop = 0; offsetLeft = (frameW - renderW) / 2;
+                    }
+                    return { renderW, renderH, offsetLeft, offsetTop, frameRect };
+                }
+
+                function applyTransform(animate = false) {
+                    const info = getRenderedImageInfo();
+                    if (!info) return;
+                    const zoomedRenderW = info.renderW * scale, zoomedRenderH = info.renderH * scale;
+                    const minTx = info.frameRect.width - info.offsetLeft - zoomedRenderW;
+                    const maxTx = -info.offsetLeft;
+                    translateX = Math.max(minTx, Math.min(maxTx, translateX));
+                    const minTy = info.frameRect.height - info.offsetTop - zoomedRenderH;
+                    const maxTy = -info.offsetTop;
+                    translateY = Math.max(minTy, Math.min(maxTy, translateY));
+                    if (scale === 1) { translateX = 0; translateY = 0; }
+                    img.style.transition = animate ? 'transform 0.3s ease' : 'none';
+                    img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+                    img.style.transformOrigin = '0 0';
+                    img.classList.toggle('zoomed', scale !== 1);
+                }
+
+                function handleDoubleClick(e) {
+                    currentZoomLevel = (currentZoomLevel + 1) % zoomLevels.length;
+                    const newScale = zoomLevels[currentZoomLevel];
+                    const info = getRenderedImageInfo();
+                    if (!info) return;
+                    if (newScale === 1) {
+                        scale = 1; translateX = 0; translateY = 0;
+                    } else {
+                        const clientX = e.clientX - info.frameRect.left;
+                        const clientY = e.clientY - info.frameRect.top;
+                        translateX = clientX - (newScale / scale) * (clientX - translateX);
+                        translateY = clientY - (newScale / scale) * (clientY - translateY);
+                        scale = newScale;
+                    }
+                    applyTransform(true);
+                }
+
+                // --- 이벤트 핸들러 ---
+                
+                // PC 마우스 핸들러
+                const onPCMouseMove = (e) => {
+                    if (!isDragging) return;
+                    translateX = e.clientX - dragStart.x;
+                    translateY = e.clientY - dragStart.y;
+                    applyTransform();
+                };
+                const onPCMouseUp = () => {
+                    isDragging = false;
+                    window.removeEventListener('mousemove', onPCMouseMove);
+                    window.removeEventListener('mouseup', onPCMouseUp);
+                };
+                const onPCMouseDown = (e) => {
+                    tooltip.classList.remove('show');
+                    clearTimeout(tooltipTimeout);
+                    if (scale > 1) {
+                        e.preventDefault();
+                        isDragging = true;
+                        dragStart = { x: e.clientX - translateX, y: e.clientY - translateY };
+                        window.addEventListener('mousemove', onPCMouseMove);
+                        window.addEventListener('mouseup', onPCMouseUp);
+                    }
+                };
+
+                // 모바일 터치 핸들러
+                const onTouchStart = (e) => {
+                    isDragging = false;
+                    if (e.touches.length > 1) { 
+                        isPinching = true; 
+                        // 핀치 줌 시작
+                        const touch1 = e.touches[0];
+                        const touch2 = e.touches[1];
+                        initialPinchDistance = Math.sqrt(
+                            Math.pow(touch2.clientX - touch1.clientX, 2) + 
+                            Math.pow(touch2.clientY - touch1.clientY, 2)
+                        );
+                        initialPinchScale = scale;
+                        pinchCenter = {
+                            x: (touch1.clientX + touch2.clientX) / 2,
+                            y: (touch1.clientY + touch2.clientY) / 2
+                        };
+                        return; 
+                    }
+                    isPinching = false;
+                    touchStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                    dragStart = { x: e.touches[0].clientX - translateX, y: e.touches[0].clientY - translateY };
+                    if (!hasHovered && scale === 1) {
+                        tooltip.classList.add('show');
+                        tooltipTimeout = setTimeout(() => { tooltip.classList.remove('show'); }, 2500);
+                        hasHovered = true;
+                    } else {
+                        tooltip.classList.remove('show');
+                        clearTimeout(tooltipTimeout);
+                    }
+                };
+                const onTouchMove = (e) => {
+                    if (e.touches.length > 1) {
+                        // 핀치 줌 처리
+                        e.preventDefault(); // 이미지 위에서의 OS 기본 동작도 방지
+                        const touch1 = e.touches[0];
+                        const touch2 = e.touches[1];
+                        const currentDistance = Math.sqrt(
+                            Math.pow(touch2.clientX - touch1.clientX, 2) + 
+                            Math.pow(touch2.clientY - touch1.clientY, 2)
+                        );
+                        
+                        if (initialPinchDistance > 0) {
+                            const scaleFactor = currentDistance / initialPinchDistance;
+                            const newScale = Math.max(1, Math.min(4, initialPinchScale * scaleFactor)); // 최소 배율을 1로 수정
+                            
+                            // 핀치 중심점을 기준으로 줌
+                            const info = getRenderedImageInfo();
+                            if (info) {
+                                const centerX = pinchCenter.x - info.frameRect.left;
+                                const centerY = pinchCenter.y - info.frameRect.top;
+                                translateX = centerX - (newScale / scale) * (centerX - translateX);
+                                translateY = centerY - (newScale / scale) * (centerY - translateY);
+                                scale = newScale;
+                                applyTransform();
+                            }
+                        }
+                        return;
+                    }
+                    
+                    if (isPinching) return; // 핀치 후 드래그로 바로 이어지는 것을 방지
+                    const moveX = e.touches[0].clientX;
+                    const moveY = e.touches[0].clientY;
+                    if (Math.abs(moveX - touchStartPos.x) > 5 || Math.abs(moveY - touchStartPos.y) > 5) {
+                        if (scale > 1) {
+                            isDragging = true;
+                            tooltip.classList.remove('show');
+                            clearTimeout(tooltipTimeout);
+                            e.preventDefault();
+                            translateX = moveX - dragStart.x;
+                            translateY = moveY - dragStart.y;
+                            applyTransform();
+                        }
+                    }
+                };
+                const onTouchEnd = (e) => {
+                    // 핀치 종료 시 currentZoomLevel을 현재 배율에 맞게 재설정
+                    if (isPinching) {
+                        if (scale > 2.5) currentZoomLevel = 2; // 4x에 가까움
+                        else if (scale > 1.5) currentZoomLevel = 1; // 2x에 가까움
+                        else currentZoomLevel = 0; // 1x에 가까움
+                    }
+
+                    if (isPinching) {
+                        if (e.touches.length === 0) isPinching = false;
+                        return;
+                    }
+                    if (isDragging) { isDragging = false; return; }
+
+                    // --- 스와이프 감지 로직 (확대되지 않았을 때만) ---
+                    if (scale === 1) {
+                        const touchEndX = e.changedTouches[0].clientX;
+                        const deltaX = touchEndX - touchStartPos.x;
+                        const touchEndY = e.changedTouches[0].clientY;
+                        const deltaY = touchEndY - touchStartPos.y;
+
+                        const swipeThreshold = 80; // 80px 이상 움직여야 스와이프로 인식
+                        const minHorizontalRatio = 2; // 수평 움직임이 수직 움직임의 2배 이상이어야 함
+
+                        // 명확한 수평 스와이프만 인식
+                        if (Math.abs(deltaX) > swipeThreshold && Math.abs(deltaX) > Math.abs(deltaY) * minHorizontalRatio) {
+                            if (deltaX > 0) { // 오른쪽으로 스와이프 (이전 페이지)
+                                const newIndex = currentIndex - 1 < 0 ? carouselItems.length - 1 : currentIndex - 1;
+                                showSlide(newIndex);
+                            } else { // 왼쪽으로 스와이프 (다음 페이지)
+                                const newIndex = (currentIndex + 1) % carouselItems.length;
+                                showSlide(newIndex);
+                            }
+                            return; // 스와이프로 처리했으므로 탭 로직은 실행하지 않음
+                        }
+                    }
+                    
+                    // --- 더블탭 감지 로직 ---
+                    const currentTime = new Date().getTime();
+                    if (currentTime - lastTap < 300) {
+                        tooltip.classList.remove('show');
+                        clearTimeout(tooltipTimeout);
+                        e.preventDefault();
+                        handleDoubleClick(e.changedTouches[0]);
+                    }
+                    lastTap = currentTime;
+                };
+
+                // --- 리스너 등록 ---
+                if (isMobile) {
+                    img.addEventListener('touchstart', onTouchStart, { passive: true }); // passive를 true로 변경
+                    img.addEventListener('touchmove', onTouchMove, { passive: false });
+                    img.addEventListener('touchend', onTouchEnd);
+                } else {
+                    img.addEventListener('dblclick', handleDoubleClick);
+                    img.addEventListener('mousedown', onPCMouseDown);
+                    img.addEventListener('mouseenter', () => {
+                        if (!hasHovered && scale === 1) {
+                            clearTimeout(tooltipTimeout);
+                            tooltip.classList.add('show');
+                            tooltipTimeout = setTimeout(() => { tooltip.classList.remove('show'); }, 2500);
+                            hasHovered = true;
+                        }
+                    });
+                }
+
+                // 슬라이드 변경 시 줌 초기화
+                const observer = new MutationObserver((mutations) => {
+                    mutations.forEach((mutation) => {
+                        if (mutation.attributeName === 'class' && !img.closest('.carousel-item').classList.contains('active')) {
+                            scale = 1; translateX = 0; translateY = 0;
+                            currentZoomLevel = 0;
+                            applyTransform();
+                            hasHovered = false;
+                        }
+                    });
+                });
+                observer.observe(img.closest('.carousel-item'), { attributes: true });
+            });
+        }
+
+        // 이전/다음 버튼 이벤트
+        var prevButton = carousel.querySelector('.carousel-control-prev');
+        var nextButton = carousel.querySelector('.carousel-control-next');
+        
+        if (prevButton) {
+            prevButton.addEventListener('click', function() {
+                var newIndex = currentIndex - 1;
+                if (newIndex < 0) {
+                    newIndex = carouselItems.length - 1; // 마지막 이미지로
+                }
+                showSlide(newIndex);
+            });
+        }
+        
+        if (nextButton) {
+            nextButton.addEventListener('click', function() {
+                var newIndex = currentIndex + 1;
+                if (newIndex >= carouselItems.length) {
+                    newIndex = 0; // 첫 번째 이미지로
+                }
+                showSlide(newIndex);
+            });
+        }
+
+        // 썸네일 클릭 이벤트
+        var thumbnailItems = document.querySelectorAll('.thumbnail-item');
+        thumbnailItems.forEach((item, index) => {
+            item.addEventListener('click', function() {
+                showSlide(index);
+            });
+        });
+
+        // 초기 슬라이드 표시
+        showSlide(0);
+        
+        // 이미지 프리로딩 시작
+        preloadImages();
+
+        // 이미지 확대 기능 설정
+        setupImageZoom();
+    });
+    </script>
+</body>
+</html> 
