@@ -14,5 +14,10 @@
   ],
   "env": {
     "PYTHONPATH": "."
+  },
+  "functions": {
+    "nfc_redirect.py": {
+      "maxDuration": 30
+    }
   }
 } 
