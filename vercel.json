@@ -22,5 +22,35 @@
       "src": "/(.*)",
       "dest": "/index.html"
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/update-latest",
+      "schedule": "0 12 * * 6"
+    },
+    {
+      "path": "/api/update-latest",
+      "schedule": "0 13 * * 6"
+    },
+    {
+      "path": "/api/update-latest",
+      "schedule": "0 14 * * 6"
+    },
+    {
+      "path": "/api/update-latest",
+      "schedule": "0 15 * * 6"
+    },
+    {
+      "path": "/api/update-latest",
+      "schedule": "0 16 * * 6"
+    },
+    {
+      "path": "/api/update-latest",
+      "schedule": "0 17 * * 6"
+    },
+    {
+      "path": "/api/update-latest",
+      "schedule": "0 18 * * 6"
+    }
   ]
 } 

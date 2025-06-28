@@ -2,8 +2,14 @@ name: Auto Update Latest Bulletin
 
 on:
   schedule:
-    # 매주 토요일 18시(한국시간, UTC+9 → UTC 9시)
-    - cron: '0 9 * * 6'
+    # 매주 토요일 12시-18시, 1시간 간격 (한국시간, UTC+9)
+    - cron: '0 3 * * 6'  # 12시 (UTC 3시)
+    - cron: '0 4 * * 6'  # 13시 (UTC 4시)
+    - cron: '0 5 * * 6'  # 14시 (UTC 5시)
+    - cron: '0 6 * * 6'  # 15시 (UTC 6시)
+    - cron: '0 7 * * 6'  # 16시 (UTC 7시)
+    - cron: '0 8 * * 6'  # 17시 (UTC 8시)
+    - cron: '0 9 * * 6'  # 18시 (UTC 9시)
   workflow_dispatch: # 수동 실행도 가능
 
 jobs:
@@ -29,6 +35,6 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add index.html
+        git add latest_bulletin.json
         git commit -m "Auto update latest bulletin" || exit 0
         git push 

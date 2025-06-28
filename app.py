@@ -103,7 +103,7 @@ def get_image_paths(post):
 @app.route('/')
 def index():
     conn = get_db_connection()
-    posts = conn.execute('SELECT * FROM weekly_posts ORDER BY created_at DESC LIMIT 1').fetchall()
+    posts = conn.execute('SELECT * FROM weekly_posts ORDER BY wr_id DESC LIMIT 1').fetchall()
     conn.close()
     
     if posts:
@@ -164,7 +164,7 @@ def post(post_id):
 @app.route('/list')
 def list_posts():
     conn = get_db_connection()
-    posts = conn.execute('SELECT * FROM weekly_posts ORDER BY created_at DESC').fetchall()
+    posts = conn.execute('SELECT * FROM weekly_posts ORDER BY wr_id DESC').fetchall()
     
     # 각 주보에 이미지 파일 정보 추가
     posts_with_images = []
