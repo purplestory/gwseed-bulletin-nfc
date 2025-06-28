@@ -2,6 +2,10 @@ import { readFile } from 'fs/promises';
 import { join } from 'path';
 
 export default async function handler(req, res) {
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
   try {
     // 저장된 최신 주보 정보 읽기
     const filePath = join(process.cwd(), 'latest_bulletin.json');

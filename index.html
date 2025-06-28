@@ -87,6 +87,11 @@
             color: #868e96;
             margin-top: 20px;
         }
+        .error-text {
+            color: #e74c3c;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -101,8 +106,7 @@
         <div class="loading"></div>
         
         <div style="margin-top: 30px;">
-            <a href="https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly&wr_id=732" 
-               class="manual-link">
+            <a href="#" id="manual-link" class="manual-link" style="display: none;">
                 이번주 주보로 이동
             </a>
         </div>
@@ -110,12 +114,48 @@
         <p class="redirect-info">
             자동으로 이동되지 않으면 버튼을 눌러주세요
         </p>
+        
+        <p id="error-text" class="error-text" style="display: none;">
+            주보 정보를 가져오는데 실패했습니다.
+        </p>
     </div>
     <script>
-        // 0.5초 후에 이번주 주보로 리다이렉트
-        setTimeout(function() {
-            window.location.href = 'https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly&wr_id=732';
-        }, 500);
+        async function getLatestBulletin() {
+            try {
+                // API에서 최신 주보 정보 가져오기
+                const response = await fetch('/api/get-latest');
+                const data = await response.json();
+                
+                if (data.wr_id) {
+                    const bulletinUrl = `https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly&wr_id=${data.wr_id}`;
+                    
+                    // 수동 링크 업데이트
+                    const manualLink = document.getElementById('manual-link');
+                    manualLink.href = bulletinUrl;
+                    manualLink.style.display = 'inline-block';
+                    
+                    // 0.5초 후 자동 리다이렉트
+                    setTimeout(function() {
+                        window.location.href = bulletinUrl;
+                    }, 500);
+                } else {
+                    throw new Error('wr_id not found');
+                }
+            } catch (error) {
+                console.error('주보 정보 가져오기 실패:', error);
+                
+                // 에러 메시지 표시
+                document.getElementById('error-text').style.display = 'block';
+                
+                // 기본 링크 표시 (wr_id 없이)
+                const manualLink = document.getElementById('manual-link');
+                manualLink.href = 'https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly';
+                manualLink.style.display = 'inline-block';
+            }
+        }
+        
+        // 페이지 로드 시 최신 주보 정보 가져오기
+        getLatestBulletin();
     </script>
 </body>
 </html> 
