@@ -83,7 +83,7 @@ def update_index_html(wr_id):
         with open('index.html', 'r', encoding='utf-8') as f:
             content = f.read()
         
-        # wr_id 패턴 찾기 및 교체
+        # wr_id 패턴 찾기 및 교체 (여러 곳에서 교체)
         updated_content = re.sub(r'wr_id=\d+', f'wr_id={wr_id}', content)
         
         if content == updated_content:
