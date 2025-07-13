@@ -40,6 +40,20 @@ export default async function handler(req, res) {
     const filePath = join(process.cwd(), 'latest_bulletin.json');
     await writeFile(filePath, JSON.stringify(bulletinInfo, null, 2));
 
+    // index.html 업데이트
+    try {
+      const indexPath = join(process.cwd(), 'index.html');
+      let indexContent = await readFile(indexPath, 'utf8');
+      
+      // wr_id 패턴 찾기 및 교체
+      const updatedContent = indexContent.replace(/wr_id=\d+/g, `wr_id=${wrId}`);
+      
+      await writeFile(indexPath, updatedContent);
+      console.log(`✅ index.html 업데이트 완료: wr_id=${wrId}`);
+    } catch (indexError) {
+      console.error('❌ index.html 업데이트 실패:', indexError);
+    }
+
     console.log(`✅ 최신 주보 업데이트: ${latestUrl}`);
     
     return res.status(200).json({
