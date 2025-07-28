@@ -22,15 +22,5 @@
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ],
-  "crons": [
-    {
-      "path": "/api/update-latest",
-      "schedule": "0 6 * * 6"
-    },
-    {
-      "path": "/api/update-latest",
-      "schedule": "0 9 * * 6"
-    }
   ]
 } 

@@ -2,14 +2,21 @@ name: Auto Update Latest Bulletin
 
 on:
   schedule:
-    # 매주 토요일 12시-18시, 1시간 간격 (한국시간, UTC+9)
-    - cron: '0 3 * * 6'  # 12시 (UTC 3시)
-    - cron: '0 4 * * 6'  # 13시 (UTC 4시)
-    - cron: '0 5 * * 6'  # 14시 (UTC 5시)
-    - cron: '0 6 * * 6'  # 15시 (UTC 6시)
-    - cron: '0 7 * * 6'  # 16시 (UTC 7시)
-    - cron: '0 8 * * 6'  # 17시 (UTC 8시)
-    - cron: '0 9 * * 6'  # 18시 (UTC 9시)
+    # 매주 토요일 12시-18시, 30분 간격 (한국시간, UTC+9)
+    - cron: '0 3 * * 6'   # 12시 (UTC 3시)
+    - cron: '30 3 * * 6'  # 12시 30분 (UTC 3시 30분)
+    - cron: '0 4 * * 6'   # 13시 (UTC 4시)
+    - cron: '30 4 * * 6'  # 13시 30분 (UTC 4시 30분)
+    - cron: '0 5 * * 6'   # 14시 (UTC 5시)
+    - cron: '30 5 * * 6'  # 14시 30분 (UTC 5시 30분)
+    - cron: '0 6 * * 6'   # 15시 (UTC 6시)
+    - cron: '30 6 * * 6'  # 15시 30분 (UTC 6시 30분)
+    - cron: '0 7 * * 6'   # 16시 (UTC 7시)
+    - cron: '30 7 * * 6'  # 16시 30분 (UTC 7시 30분)
+    - cron: '0 8 * * 6'   # 17시 (UTC 8시)
+    - cron: '30 8 * * 6'  # 17시 30분 (UTC 8시 30분)
+    - cron: '0 9 * * 6'   # 18시 (UTC 9시)
+    - cron: '30 9 * * 6'  # 18시 30분 (UTC 9시 30분)
   workflow_dispatch: # 수동 실행도 가능
 
 jobs:
@@ -29,12 +36,32 @@ jobs:
         pip install requests beautifulsoup4
     
     - name: Run auto update script
-      run: python auto_update_script.py
+      run: |
+        python auto_update_script.py
+        echo "Auto update script completed"
+    
+    - name: Check for changes
+      id: check_changes
+      run: |
+        if [[ -n "$(git status --porcelain)" ]]; then
+          echo "::set-output name=has_changes::true"
+          echo "Changes detected, will commit and push"
+        else
+          echo "::set-output name=has_changes::false"
+          echo "No changes detected"
+        fi
     
     - name: Commit and push changes
+      if: steps.check_changes.outputs.has_changes == 'true'
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add index.html latest_bulletin.json
-        git commit -m "Auto update latest bulletin" || exit 0
-        git push 
+        git commit -m "Auto update latest bulletin $(date +'%Y-%m-%d %H:%M:%S')"
+        git push
+        echo "Changes committed and pushed successfully"
+    
+    - name: No changes message
+      if: steps.check_changes.outputs.has_changes == 'false'
+      run: |
+        echo "No new bulletin found, skipping commit" 
