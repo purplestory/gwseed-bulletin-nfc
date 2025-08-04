@@ -172,6 +172,20 @@ def get_latest_bulletin_from_website():
     
     # 웹사이트 접근이 완전히 실패한 경우
     print("❌ 교회 웹사이트에 접근할 수 없습니다. 수동 확인이 필요합니다.")
+    print("💡 해결 방법:")
+    print("   1. https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly 접속")
+    print("   2. 최신 주보의 wr_id 확인")
+    print("   3. index.html 파일에서 wr_id 수동 업데이트")
+    print("   4. GitHub에 커밋 및 푸시")
+    
+    # 현재 상태 유지
+    current_file = get_latest_bulletin_from_file()
+    if current_file:
+        print(f"📋 현재 설정된 wr_id: {current_file.get('wr_id', '없음')}")
+        print(f"📋 현재 설정된 제목: {current_file.get('title', '없음')}")
+    else:
+        print("📋 현재 설정된 주보 정보가 없습니다.")
+    
     return None
 
 def get_latest_bulletin_from_file():
