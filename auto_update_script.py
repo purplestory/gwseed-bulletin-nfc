@@ -38,9 +38,9 @@ def get_latest_bulletin_from_website():
             # 더 실제적인 브라우저 헤더 설정
             headers = {
                 'User-Agent': user_agent,
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-                'Accept-Language': 'ko-KR,ko;q=0.9,en;q=0.8',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
                 'Accept-Encoding': 'gzip, deflate, br',
+                'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
                 'DNT': '1',
                 'Connection': 'keep-alive',
                 'Upgrade-Insecure-Requests': '1',
@@ -72,6 +72,11 @@ def get_latest_bulletin_from_website():
             # 잠시 대기 (봇 감지 방지)
             import time
             time.sleep(2)
+            
+            # JavaScript 실행을 시뮬레이션하기 위해 추가 요청
+            print(f"🔄 JavaScript 환경 시뮬레이션...")
+            js_response = session.get("https://www.godswillseed.or.kr/cupid.js", timeout=10)
+            time.sleep(1)
             
             # 주보 페이지 접속
             print(f"🔄 주보 페이지 접속 중...")
