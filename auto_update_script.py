@@ -68,8 +68,10 @@ def get_latest_bulletin_from_website():
             
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # 최신 주보 링크 찾기 (공지가 아닌 일반 게시물)
+            # 최신 주보 링크 찾기 (여러 방법 시도)
             latest_post = None
+            
+            # 방법 1: 기존 방법 (tbody tr:not(.bo_notice))
             for post in soup.select("tbody tr:not(.bo_notice)"):
                 link_tag = post.select_one("td.td_subject a")
                 if link_tag and 'href' in link_tag.attrs:
@@ -94,6 +96,46 @@ def get_latest_bulletin_from_website():
                         print(f"✅ User-Agent {i}로 성공: wr_id={wr_id}")
                         return latest_post
             
+            # 방법 2: 모든 링크에서 wr_id 찾기
+            all_links = soup.find_all('a', href=True)
+            for link in all_links:
+                href = str(link['href'])
+                if 'wr_id=' in href and 'weekly' in href:
+                    if not href.startswith('http'):
+                        href = "https://www.godswillseed.or.kr" + href
+                    
+                    # wr_id 추출
+                    wr_id_match = re.search(r'wr_id=(\d+)', href)
+                    wr_id = wr_id_match.group(1) if wr_id_match else None
+                    
+                    # 제목 추출
+                    title = link.get_text(strip=True)
+                    
+                    latest_post = {
+                        'url': href,
+                        'wr_id': wr_id,
+                        'title': title,
+                        'timestamp': datetime.now().isoformat()
+                    }
+                    print(f"✅ User-Agent {i}로 성공 (방법 2): wr_id={wr_id}")
+                    return latest_post
+            
+            # 방법 3: 텍스트에서 wr_id 패턴 찾기
+            text_content = soup.get_text()
+            wr_id_matches = re.findall(r'wr_id=(\d+)', text_content)
+            if wr_id_matches:
+                latest_wr_id = max(wr_id_matches, key=int)
+                latest_url = f"https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly&wr_id={latest_wr_id}"
+                
+                latest_post = {
+                    'url': latest_url,
+                    'wr_id': latest_wr_id,
+                    'title': f"주보 {latest_wr_id}",
+                    'timestamp': datetime.now().isoformat()
+                }
+                print(f"✅ User-Agent {i}로 성공 (방법 3): wr_id={latest_wr_id}")
+                return latest_post
+            
             print(f"❌ User-Agent {i}로 실패: 주보 링크를 찾을 수 없습니다.")
             
         except Exception as e:
@@ -102,43 +144,8 @@ def get_latest_bulletin_from_website():
     
     print("❌ 모든 User-Agent 시도가 실패했습니다.")
     
-    # 대안 방법: 현재 파일에서 wr_id 추출하여 +1 증가
-    try:
-        current_file = get_latest_bulletin_from_file()
-        if current_file and current_file.get('wr_id'):
-            current_wr_id = int(current_file['wr_id'])
-            next_wr_id = current_wr_id + 1
-            
-            print(f"🔄 웹사이트 접근 실패. 현재 wr_id({current_wr_id})에서 +1 증가하여 {next_wr_id}로 시도합니다.")
-            
-            # 새로운 wr_id로 URL 테스트
-            test_url = f"https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly&wr_id={next_wr_id}"
-            test_response = requests.get(test_url, timeout=10)
-            
-            if test_response.status_code == 200:
-                print(f"✅ 새로운 주보 발견: wr_id={next_wr_id}")
-                return {
-                    'url': test_url,
-                    'wr_id': str(next_wr_id),
-                    'title': f"주보 {next_wr_id}",
-                    'timestamp': datetime.now().isoformat()
-                }
-            else:
-                print(f"❌ wr_id={next_wr_id}는 존재하지 않습니다.")
-                
-    except Exception as fallback_error:
-        print(f"대안 방법도 실패: {fallback_error}")
-    
-    # 최종 대안: 현재 wr_id를 그대로 사용 (최소한 현재 상태 유지)
-    try:
-        current_file = get_latest_bulletin_from_file()
-        if current_file and current_file.get('wr_id'):
-            current_wr_id = current_file['wr_id']
-            print(f"🔄 최종 대안: 현재 wr_id({current_wr_id})를 그대로 사용합니다.")
-            return current_file
-    except Exception as final_error:
-        print(f"최종 대안도 실패: {final_error}")
-    
+    # 웹사이트 접근이 완전히 실패한 경우
+    print("❌ 교회 웹사이트에 접근할 수 없습니다. 수동 확인이 필요합니다.")
     return None
 
 def get_latest_bulletin_from_file():
