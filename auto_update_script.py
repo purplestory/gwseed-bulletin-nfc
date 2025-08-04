@@ -19,7 +19,10 @@ def get_latest_bulletin_from_website():
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15',
-        'curl/7.68.0'  # GitHub Actions 환경에서 사용 가능한 curl
+        'curl/7.68.0',  # GitHub Actions 환경에서 사용 가능한 curl
+        # GitHub Actions 환경용 추가 User-Agent
+        'Mozilla/5.0 (Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0',
+        'Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     ]
     
     for i, user_agent in enumerate(user_agents, 1):
@@ -40,7 +43,11 @@ def get_latest_bulletin_from_website():
                 'Sec-Fetch-Dest': 'document',
                 'Sec-Fetch-Mode': 'navigate',
                 'Sec-Fetch-Site': 'none',
-                'Cache-Control': 'max-age=0'
+                'Cache-Control': 'max-age=0',
+                # GitHub Actions 환경용 추가 헤더
+                'X-Forwarded-For': '127.0.0.1',
+                'X-Real-IP': '127.0.0.1',
+                'X-Requested-With': 'XMLHttpRequest'
             }
             
             # 세션 사용으로 쿠키 유지
