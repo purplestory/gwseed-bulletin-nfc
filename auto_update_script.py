@@ -22,7 +22,11 @@ def get_latest_bulletin_from_website():
         'curl/7.68.0',  # GitHub Actions 환경에서 사용 가능한 curl
         # GitHub Actions 환경용 추가 User-Agent
         'Mozilla/5.0 (Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0',
-        'Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        'Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        # 추가 실제 브라우저 User-Agent
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0'
     ]
     
     for i, user_agent in enumerate(user_agents, 1):
@@ -47,22 +51,30 @@ def get_latest_bulletin_from_website():
                 # GitHub Actions 환경용 추가 헤더
                 'X-Forwarded-For': '127.0.0.1',
                 'X-Real-IP': '127.0.0.1',
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+                # 추가 봇 차단 우회 헤더
+                'Referer': 'https://www.godswillseed.or.kr/',
+                'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+                'Sec-Ch-Ua-Mobile': '?0',
+                'Sec-Ch-Ua-Platform': '"Windows"',
+                'Sec-Fetch-User': '?1'
             }
             
             # 세션 사용으로 쿠키 유지
             session = requests.Session()
             session.headers.update(headers)
             
-            # 먼저 메인 페이지에 접속
+            # 먼저 메인 페이지에 접속 (봇 감지 방지)
+            print(f"🔄 메인 페이지 접속 중...")
             main_response = session.get("https://www.godswillseed.or.kr/", timeout=15)
             main_response.raise_for_status()
             
             # 잠시 대기 (봇 감지 방지)
             import time
-            time.sleep(1)
+            time.sleep(2)
             
             # 주보 페이지 접속
+            print(f"🔄 주보 페이지 접속 중...")
             response = session.get(url, timeout=15)
             response.raise_for_status()
             
