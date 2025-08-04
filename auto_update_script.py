@@ -78,12 +78,37 @@ def get_latest_bulletin_from_website():
             response = session.get(url, timeout=15)
             response.raise_for_status()
             
+            # 디버그: 응답 내용 확인
+            print(f"📄 응답 상태 코드: {response.status_code}")
+            print(f"📄 응답 헤더: {dict(response.headers)}")
+            print(f"📄 응답 내용 길이: {len(response.text)} 문자")
+            
+            # 응답 내용의 일부를 출력 (디버그용)
+            content_preview = response.text[:500]
+            print(f"📄 응답 내용 미리보기: {content_preview}")
+            
             soup = BeautifulSoup(response.text, 'html.parser')
             
             # 최신 주보 링크 찾기 (여러 방법 시도)
             latest_post = None
             
-            # 방법 1: 기존 방법 (tbody tr:not(.bo_notice))
+            # 방법 1: 단순한 텍스트에서 wr_id 패턴 찾기 (가장 먼저 시도)
+            text_content = response.text
+            wr_id_matches = re.findall(r'wr_id=(\d+)', text_content)
+            if wr_id_matches:
+                latest_wr_id = max(wr_id_matches, key=int)
+                latest_url = f"https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly&wr_id={latest_wr_id}"
+                
+                latest_post = {
+                    'url': latest_url,
+                    'wr_id': latest_wr_id,
+                    'title': f"주보 {latest_wr_id}",
+                    'timestamp': datetime.now().isoformat()
+                }
+                print(f"✅ User-Agent {i}로 성공 (텍스트 검색): wr_id={latest_wr_id}")
+                return latest_post
+            
+            # 방법 2: 기존 방법 (tbody tr:not(.bo_notice))
             for post in soup.select("tbody tr:not(.bo_notice)"):
                 link_tag = post.select_one("td.td_subject a")
                 if link_tag and 'href' in link_tag.attrs:
@@ -108,7 +133,7 @@ def get_latest_bulletin_from_website():
                         print(f"✅ User-Agent {i}로 성공: wr_id={wr_id}")
                         return latest_post
             
-            # 방법 2: 모든 링크에서 wr_id 찾기
+            # 방법 3: 모든 링크에서 wr_id 찾기
             all_links = soup.find_all('a', href=True)
             for link in all_links:
                 href = str(link['href'])
@@ -131,22 +156,6 @@ def get_latest_bulletin_from_website():
                     }
                     print(f"✅ User-Agent {i}로 성공 (방법 2): wr_id={wr_id}")
                     return latest_post
-            
-            # 방법 3: 텍스트에서 wr_id 패턴 찾기
-            text_content = soup.get_text()
-            wr_id_matches = re.findall(r'wr_id=(\d+)', text_content)
-            if wr_id_matches:
-                latest_wr_id = max(wr_id_matches, key=int)
-                latest_url = f"https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly&wr_id={latest_wr_id}"
-                
-                latest_post = {
-                    'url': latest_url,
-                    'wr_id': latest_wr_id,
-                    'title': f"주보 {latest_wr_id}",
-                    'timestamp': datetime.now().isoformat()
-                }
-                print(f"✅ User-Agent {i}로 성공 (방법 3): wr_id={latest_wr_id}")
-                return latest_post
             
             print(f"❌ User-Agent {i}로 실패: 주보 링크를 찾을 수 없습니다.")
             
