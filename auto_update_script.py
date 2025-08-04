@@ -105,6 +105,16 @@ def get_latest_bulletin_from_website():
         except Exception as fallback_error:
             print(f"대안 방법도 실패: {fallback_error}")
         
+        # 최종 대안: 현재 wr_id를 그대로 사용 (최소한 현재 상태 유지)
+        try:
+            current_file = get_latest_bulletin_from_file()
+            if current_file and current_file.get('wr_id'):
+                current_wr_id = current_file['wr_id']
+                print(f"🔄 최종 대안: 현재 wr_id({current_wr_id})를 그대로 사용합니다.")
+                return current_file
+        except Exception as final_error:
+            print(f"최종 대안도 실패: {final_error}")
+        
         return None
 
 def get_latest_bulletin_from_file():

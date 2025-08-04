@@ -58,10 +58,10 @@ jobs:
       id: check_changes
       run: |
         if [[ -n "$(git status --porcelain)" ]]; then
-          echo "::set-output name=has_changes::true"
+          echo "has_changes=true" >> $GITHUB_OUTPUT
           echo "Changes detected, will commit and push"
         else
-          echo "::set-output name=has_changes::false"
+          echo "has_changes=false" >> $GITHUB_OUTPUT
           echo "No changes detected"
         fi
     
