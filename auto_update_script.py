@@ -14,11 +14,36 @@ def get_latest_bulletin_from_website():
     """교회 웹사이트에서 최신 주보 정보 가져오기"""
     try:
         url = "https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly"
+        
+        # 더 실제적인 브라우저 헤더 설정
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Language': 'ko-KR,ko;q=0.9,en;q=0.8',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'DNT': '1',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Cache-Control': 'max-age=0'
         }
         
-        response = requests.get(url, headers=headers, timeout=10)
+        # 세션 사용으로 쿠키 유지
+        session = requests.Session()
+        session.headers.update(headers)
+        
+        # 먼저 메인 페이지에 접속
+        main_response = session.get("https://www.godswillseed.or.kr/", timeout=15)
+        main_response.raise_for_status()
+        
+        # 잠시 대기 (봇 감지 방지)
+        import time
+        time.sleep(2)
+        
+        # 주보 페이지 접속
+        response = session.get(url, timeout=15)
         response.raise_for_status()
         
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -52,6 +77,34 @@ def get_latest_bulletin_from_website():
         
     except Exception as e:
         print(f"최신 주보 정보 가져오기 실패: {e}")
+        
+        # 대안 방법: 현재 파일에서 wr_id 추출하여 +1 증가
+        try:
+            current_file = get_latest_bulletin_from_file()
+            if current_file and current_file.get('wr_id'):
+                current_wr_id = int(current_file['wr_id'])
+                next_wr_id = current_wr_id + 1
+                
+                print(f"🔄 웹사이트 접근 실패. 현재 wr_id({current_wr_id})에서 +1 증가하여 {next_wr_id}로 시도합니다.")
+                
+                # 새로운 wr_id로 URL 테스트
+                test_url = f"https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly&wr_id={next_wr_id}"
+                test_response = session.get(test_url, timeout=10)
+                
+                if test_response.status_code == 200:
+                    print(f"✅ 새로운 주보 발견: wr_id={next_wr_id}")
+                    return {
+                        'url': test_url,
+                        'wr_id': str(next_wr_id),
+                        'title': f"주보 {next_wr_id}",
+                        'timestamp': datetime.now().isoformat()
+                    }
+                else:
+                    print(f"❌ wr_id={next_wr_id}는 존재하지 않습니다.")
+                    
+        except Exception as fallback_error:
+            print(f"대안 방법도 실패: {fallback_error}")
+        
         return None
 
 def get_latest_bulletin_from_file():
