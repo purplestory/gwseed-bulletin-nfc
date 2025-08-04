@@ -74,6 +74,8 @@ jobs:
         git config --local user.name "github-actions[bot]"
         git add index.html latest_bulletin.json
         git commit -m "Auto update latest bulletin $(date +'%Y-%m-%d %H:%M:%S')"
+        # 푸시하기 전에 원격 변경사항 가져오기 및 병합
+        git pull origin main --rebase
         git push origin main
         echo "Changes committed and pushed successfully"
     
