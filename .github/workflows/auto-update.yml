@@ -1,0 +1,61 @@
+name: Auto Update Latest Bulletin
+
+on:
+  schedule:
+    # 백업용: 매주 토요일 오후 3시와 6시에만 실행 (한국시간, UTC+9)
+    - cron: '0 6 * * 6'   # 15시 (UTC 6시)
+    - cron: '0 9 * * 6'   # 18시 (UTC 9시)
+    # 크리스마스 이브(12월 24일) 오후 6시 실행 (한국시간, UTC+9)
+    - cron: '0 9 24 12 *' # 12월 24일 18시 (UTC 9시)
+  workflow_dispatch: # 수동 실행도 가능
+
+jobs:
+  update-bulletin:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+    
+    - name: Install dependencies
+      run: |
+        pip install requests beautifulsoup4
+    
+    - name: Run auto update script
+      run: |
+        python auto_update_script.py
+        echo "Auto update script completed"
+    
+    - name: Check for changes
+      id: check_changes
+      run: |
+        if [[ -n "$(git status --porcelain)" ]]; then
+          echo "has_changes=true" >> $GITHUB_OUTPUT
+          echo "Changes detected, will commit and push"
+        else
+          echo "has_changes=false" >> $GITHUB_OUTPUT
+          echo "No changes detected"
+        fi
+    
+    - name: Commit and push changes
+      if: steps.check_changes.outputs.has_changes == 'true'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add index.html latest_bulletin.json
+        git commit -m "Auto update latest bulletin $(date +'%Y-%m-%d %H:%M:%S')"
+        # 푸시하기 전에 원격 변경사항 가져오기 및 병합
+        git pull origin main --rebase
+        git push origin main
+        echo "Changes committed and pushed successfully"
+    
+    - name: No changes message
+      if: steps.check_changes.outputs.has_changes == 'false'
+      run: |
+        echo "No new bulletin found, skipping commit" 
