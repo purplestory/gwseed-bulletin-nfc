@@ -121,33 +121,38 @@
         </p>
     </div>
     <script>
+        // 기본 주보 페이지 URL
+        const baseUrl = 'https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly';
+        
         // 최신 주보 정보 가져오기
         async function getLatestBulletin() {
+            let bulletinUrl = baseUrl;
+            
             try {
                 const response = await fetch('/api/get-latest');
-                const data = await response.json();
-                
-                if (data.wr_id) {
-                    const bulletinUrl = `https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly&wr_id=${data.wr_id}`;
-                    
-                    // 링크 업데이트
-                    const linkElement = document.querySelector('.manual-link');
-                    if (linkElement) {
-                        linkElement.href = bulletinUrl;
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.wr_id) {
+                        // wr_id가 있으면 특정 주보로 리다이렉트
+                        bulletinUrl = `${baseUrl}&wr_id=${data.wr_id}`;
                     }
-                    
-                    // 0.5초 후에 리다이렉트
-                    setTimeout(function() {
-                        window.location.href = bulletinUrl;
-                    }, 500);
-                } else {
-                    // wr_id가 없으면 에러 표시
-                    document.getElementById('error-text').style.display = 'block';
+                    // wr_id가 없으면 기본 주보 리스트 페이지 사용
                 }
             } catch (error) {
-                console.error('주보 정보 가져오기 실패:', error);
-                document.getElementById('error-text').style.display = 'block';
+                console.error('주보 정보 가져오기 실패, 주보 리스트 페이지로 이동:', error);
+                // API 실패 시에도 주보 리스트 페이지로 이동
             }
+            
+            // 링크 업데이트
+            const linkElement = document.querySelector('.manual-link');
+            if (linkElement) {
+                linkElement.href = bulletinUrl;
+            }
+            
+            // 0.5초 후에 리다이렉트
+            setTimeout(function() {
+                window.location.href = bulletinUrl;
+            }, 500);
         }
         
         // 페이지 로드 시 최신 주보 정보 가져오기

@@ -17,7 +17,7 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('❌ 최신 주보 정보 읽기 실패:', error);
     
-    // 파일이 없거나 읽기 실패 시 기본값 반환
+    // 파일이 없거나 읽기 실패 시 주보 리스트 페이지 URL만 반환
     return res.status(200).json({
       url: "https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly",
       wr_id: null,
