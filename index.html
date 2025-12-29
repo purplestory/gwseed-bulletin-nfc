@@ -129,25 +129,30 @@
             let bulletinUrl = baseUrl;
             
             try {
-                // GitHub raw 파일에서 직접 최신 주보 정보 가져오기
-                const githubRawUrl = 'https://raw.githubusercontent.com/purplestory/gwseed-bulletin-nfc/main/latest_bulletin.json';
-                const response = await fetch(githubRawUrl, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'Cache-Control': 'no-cache'
-                    }
-                });
+                // 먼저 Vercel API 시도, 실패하면 GitHub raw 파일 직접 읽기
+                let response = await fetch('/api/get-latest');
+                console.log('Vercel API 응답 상태:', response.status, response.ok);
                 
-                console.log('GitHub API 응답 상태:', response.status, response.ok);
+                // API가 HTML을 반환하면 (라우팅 문제) GitHub raw 파일 직접 읽기
+                if (!response.ok || response.headers.get('content-type')?.includes('text/html')) {
+                    console.warn('Vercel API 실패, GitHub raw 파일 직접 읽기');
+                    const githubRawUrl = 'https://raw.githubusercontent.com/purplestory/gwseed-bulletin-nfc/main/latest_bulletin.json';
+                    response = await fetch(githubRawUrl, {
+                        headers: {
+                            'Accept': 'application/json',
+                            'Cache-Control': 'no-cache'
+                        }
+                    });
+                }
                 
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('GitHub API 응답 데이터:', data);
+                    console.log('API 응답 데이터:', data);
                     
                     // 완전한 URL을 반환하면 그것을 사용, 아니면 wr_id로 구성
                     if (data.url && data.url.includes('wr_id=')) {
                         bulletinUrl = data.url;
-                        console.log('GitHub에서 받은 완전한 URL 사용:', bulletinUrl);
+                        console.log('받은 완전한 URL 사용:', bulletinUrl);
                     } else if (data.wr_id) {
                         // wr_id가 있으면 특정 주보로 리다이렉트
                         bulletinUrl = `${baseUrl}&wr_id=${data.wr_id}`;
@@ -156,7 +161,7 @@
                         console.warn('wr_id가 없습니다. 주보 리스트 페이지로 이동합니다.');
                     }
                 } else {
-                    console.error('GitHub API 응답 실패:', response.status, response.statusText);
+                    console.error('API 응답 실패:', response.status, response.statusText);
                 }
             } catch (error) {
                 console.error('주보 정보 가져오기 실패, 주보 리스트 페이지로 이동:', error);
