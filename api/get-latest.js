@@ -1,17 +1,23 @@
-import { readFile } from 'fs/promises';
-import { join } from 'path';
-
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    // 저장된 최신 주보 정보 읽기
-    const filePath = join(process.cwd(), 'latest_bulletin.json');
-    const fileContent = await readFile(filePath, 'utf-8');
-    const bulletinInfo = JSON.parse(fileContent);
+    // GitHub에서 최신 주보 정보 읽기 (항상 최신 버전)
+    const githubRawUrl = 'https://raw.githubusercontent.com/purplestory/gwseed-bulletin-nfc/main/latest_bulletin.json';
+    const response = await fetch(githubRawUrl, {
+      headers: {
+        'Accept': 'application/json',
+        'Cache-Control': 'no-cache'
+      }
+    });
 
+    if (!response.ok) {
+      throw new Error(`GitHub API error: ${response.status}`);
+    }
+
+    const bulletinInfo = await response.json();
     return res.status(200).json(bulletinInfo);
 
   } catch (error) {
