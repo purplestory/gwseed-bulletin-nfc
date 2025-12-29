@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>높은뜻씨앗이되어교회 주보</title>
     <link rel="preload" href="assets/static_thumbnail.jpg" as="image">
-    <!-- <meta http-equiv="refresh" content="1.5; url=https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly&wr_id=761"> -->
+    <!-- <meta http-equiv="refresh" content="1.5; url=https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly&wr_id=763"> -->
     <style>
         * {
             box-sizing: border-box; /* 레이아웃 계산 방식 통일 */
@@ -106,7 +106,7 @@
         <div class="loading"></div>
         
         <div style="margin-top: 30px;">
-            <a href="https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly&wr_id=761" 
+            <a href="https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly&wr_id=763" 
                class="manual-link">
                 이번주 주보로 이동
             </a>
@@ -121,10 +121,37 @@
         </p>
     </div>
     <script>
-        // 0.5초 후에 이번주 주보로 리다이렉트
-        setTimeout(function() {
-            window.location.href = 'https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly&wr_id=761';
-        }, 500);
+        // 최신 주보 정보 가져오기
+        async function getLatestBulletin() {
+            try {
+                const response = await fetch('/api/get-latest');
+                const data = await response.json();
+                
+                if (data.wr_id) {
+                    const bulletinUrl = `https://www.godswillseed.or.kr/bbs/board.php?bo_table=weekly&wr_id=${data.wr_id}`;
+                    
+                    // 링크 업데이트
+                    const linkElement = document.querySelector('.manual-link');
+                    if (linkElement) {
+                        linkElement.href = bulletinUrl;
+                    }
+                    
+                    // 0.5초 후에 리다이렉트
+                    setTimeout(function() {
+                        window.location.href = bulletinUrl;
+                    }, 500);
+                } else {
+                    // wr_id가 없으면 에러 표시
+                    document.getElementById('error-text').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('주보 정보 가져오기 실패:', error);
+                document.getElementById('error-text').style.display = 'block';
+            }
+        }
+        
+        // 페이지 로드 시 최신 주보 정보 가져오기
+        getLatestBulletin();
     </script>
 </body>
 </html> 
