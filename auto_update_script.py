@@ -215,12 +215,12 @@ def update_latest_bulletin_file(bulletin_info):
 def download_thumbnail_from_bulletin(bulletin_url, wr_id):
     """주보 페이지에서 첫 번째 이미지를 다운로드하여 썸네일로 저장"""
     try:
-        # wr_id가 764 미만이면 썸네일 다운로드하지 않음
-        if int(wr_id) < 764:
-            print(f"📷 wr_id {wr_id}는 764 미만이므로 썸네일 다운로드 건너뜀")
+        # 2026년 첫 주 주보(wr_id 764)일 때만 썸네일 다운로드
+        if int(wr_id) != 764:
+            print(f"📷 wr_id {wr_id}는 764가 아니므로 썸네일 다운로드 건너뜀 (2026년 첫 주 주보만 다운로드)")
             return False
         
-        print(f"📷 주보 페이지에서 썸네일 이미지 다운로드 시도: {bulletin_url}")
+        print(f"📷 2026년 첫 주 주보 썸네일 이미지 다운로드 시도: {bulletin_url} (wr_id: {wr_id})")
         
         # 세션 생성
         session = requests.Session()
@@ -340,9 +340,8 @@ def check_and_update_latest_bulletin():
     if not file_latest or int(website_latest['wr_id']) > int(file_latest['wr_id']):
         print("🆕 새로운 주보가 발견되었습니다!")
         
-        # wr_id가 764 이상이면 썸네일 다운로드 시도
-        if int(website_latest['wr_id']) >= 764:
-            download_thumbnail_from_bulletin(website_latest['url'], website_latest['wr_id'])
+        # 새로운 주보가 발견될 때마다 썸네일 다운로드 시도
+        download_thumbnail_from_bulletin(website_latest['url'], website_latest['wr_id'])
         
         # index.html 업데이트
         if update_index_html(website_latest['wr_id']):

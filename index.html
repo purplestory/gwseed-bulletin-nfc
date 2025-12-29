@@ -149,13 +149,19 @@
                     const data = await response.json();
                     console.log('API 응답 데이터:', data);
                     
-                    // 2026년 1월 첫 주 주보(ID 763 이상)부터 새로운 썸네일 사용
-                    if (data.wr_id && parseInt(data.wr_id) >= 763) {
-                        const thumbnailImg = document.getElementById('bulletin-thumbnail');
-                        if (thumbnailImg) {
+                    // 썸네일 이미지 설정 - 항상 새로운 썸네일 사용
+                    const thumbnailImg = document.getElementById('bulletin-thumbnail');
+                    if (thumbnailImg) {
+                        // 새 썸네일로 변경 (이미지가 로드된 후에만 변경하여 깜빡임 방지)
+                        const newThumbnail = new Image();
+                        newThumbnail.onload = function() {
                             thumbnailImg.src = 'assets/thumbnail_2026.jpg';
-                            console.log('2026년 썸네일로 변경:', data.wr_id);
-                        }
+                            console.log('새 썸네일로 변경 완료');
+                        };
+                        newThumbnail.onerror = function() {
+                            console.log('새 썸네일 로드 실패, 기본 썸네일 유지');
+                        };
+                        newThumbnail.src = 'assets/thumbnail_2026.jpg';
                     }
                     
                     // 완전한 URL을 반환하면 그것을 사용, 아니면 wr_id로 구성
