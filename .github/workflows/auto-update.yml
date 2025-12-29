@@ -53,6 +53,10 @@ jobs:
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
         git add index.html latest_bulletin.json
+        # 썸네일 이미지가 있으면 추가
+        if [ -f "assets/thumbnail_2026.jpg" ]; then
+          git add assets/thumbnail_2026.jpg
+        fi
         git commit -m "Auto update latest bulletin $(date +'%Y-%m-%d %H:%M:%S')"
         # 푸시하기 전에 원격 변경사항 가져오기 및 병합
         git pull origin main --rebase

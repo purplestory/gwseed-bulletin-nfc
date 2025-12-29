@@ -9,6 +9,7 @@ import re
 from datetime import datetime
 import json
 import os
+from urllib.parse import urljoin, urlparse
 
 def get_latest_bulletin_from_website():
     """교회 웹사이트에서 최신 주보 정보 가져오기"""
@@ -211,6 +212,88 @@ def update_latest_bulletin_file(bulletin_info):
         print(f"❌ 파일 업데이트 실패: {e}")
         return False
 
+def download_thumbnail_from_bulletin(bulletin_url, wr_id):
+    """주보 페이지에서 첫 번째 이미지를 다운로드하여 썸네일로 저장"""
+    try:
+        # wr_id가 764 미만이면 썸네일 다운로드하지 않음
+        if int(wr_id) < 764:
+            print(f"📷 wr_id {wr_id}는 764 미만이므로 썸네일 다운로드 건너뜀")
+            return False
+        
+        print(f"📷 주보 페이지에서 썸네일 이미지 다운로드 시도: {bulletin_url}")
+        
+        # 세션 생성
+        session = requests.Session()
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+        }
+        session.headers.update(headers)
+        
+        # 주보 페이지 가져오기
+        response = session.get(bulletin_url, timeout=15)
+        response.raise_for_status()
+        
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # 주보 본문에서 첫 번째 이미지 찾기
+        # 여러 방법 시도: 게시물 본문, 이미지 태그 등
+        image_url = None
+        
+        # 방법 1: 게시물 본문의 첫 번째 이미지
+        content_area = soup.find('div', class_='view-content') or soup.find('div', id='bo_v_con') or soup.find('div', class_='bo_v_con')
+        if content_area:
+            img_tags = content_area.find_all('img')
+            for img in img_tags:
+                src = img.get('src') or img.get('data-src')
+                if src:
+                    # 상대 경로를 절대 경로로 변환
+                    if not src.startswith('http'):
+                        src = urljoin('https://www.godswillseed.or.kr', src)
+                    # 로고나 아이콘이 아닌 실제 이미지인지 확인
+                    if not any(skip in src.lower() for skip in ['logo', 'icon', 'button', 'bg', 'header', 'footer']):
+                        image_url = src
+                        print(f"📷 첫 번째 이미지 발견: {image_url}")
+                        break
+        
+        # 방법 2: 페이지의 모든 이미지 중 첫 번째
+        if not image_url:
+            all_imgs = soup.find_all('img')
+            for img in all_imgs:
+                src = img.get('src') or img.get('data-src')
+                if src:
+                    if not src.startswith('http'):
+                        src = urljoin('https://www.godswillseed.or.kr', src)
+                    if not any(skip in src.lower() for skip in ['logo', 'icon', 'button', 'bg', 'header', 'footer', 'thumbnail']):
+                        image_url = src
+                        print(f"📷 이미지 발견: {image_url}")
+                        break
+        
+        if not image_url:
+            print("⚠️ 주보 페이지에서 이미지를 찾을 수 없습니다.")
+            return False
+        
+        # 이미지 다운로드
+        print(f"⬇️ 이미지 다운로드 중: {image_url}")
+        img_response = session.get(image_url, timeout=15)
+        img_response.raise_for_status()
+        
+        # assets 폴더가 없으면 생성
+        os.makedirs('assets', exist_ok=True)
+        
+        # 썸네일로 저장
+        thumbnail_path = 'assets/thumbnail_2026.jpg'
+        with open(thumbnail_path, 'wb') as f:
+            f.write(img_response.content)
+        
+        print(f"✅ 썸네일 이미지 저장 완료: {thumbnail_path}")
+        return True
+        
+    except Exception as e:
+        print(f"❌ 썸네일 다운로드 실패: {e}")
+        return False
+
 def update_index_html(wr_id):
     """index.html 파일에서 wr_id 업데이트"""
     try:
@@ -256,6 +339,10 @@ def check_and_update_latest_bulletin():
     # 새로운 주보인지 확인
     if not file_latest or int(website_latest['wr_id']) > int(file_latest['wr_id']):
         print("🆕 새로운 주보가 발견되었습니다!")
+        
+        # wr_id가 764 이상이면 썸네일 다운로드 시도
+        if int(website_latest['wr_id']) >= 764:
+            download_thumbnail_from_bulletin(website_latest['url'], website_latest['wr_id'])
         
         # index.html 업데이트
         if update_index_html(website_latest['wr_id']):

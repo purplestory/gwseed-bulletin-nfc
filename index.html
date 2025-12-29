@@ -100,7 +100,7 @@
         <p class="status-text">이번주 주보로 이동 중입니다...</p>
         
         <div class="thumbnail-container">
-            <img src="assets/static_thumbnail.jpg" alt="높은뜻씨앗이되어교회 주보" class="bulletin-thumbnail">
+            <img id="bulletin-thumbnail" src="assets/static_thumbnail.jpg" alt="높은뜻씨앗이되어교회 주보" class="bulletin-thumbnail">
         </div>
         
         <div class="loading"></div>
@@ -148,6 +148,15 @@
                 if (response.ok) {
                     const data = await response.json();
                     console.log('API 응답 데이터:', data);
+                    
+                    // 2026년 1월 첫 주 주보(ID 763 이상)부터 새로운 썸네일 사용
+                    if (data.wr_id && parseInt(data.wr_id) >= 763) {
+                        const thumbnailImg = document.getElementById('bulletin-thumbnail');
+                        if (thumbnailImg) {
+                            thumbnailImg.src = 'assets/thumbnail_2026.jpg';
+                            console.log('2026년 썸네일로 변경:', data.wr_id);
+                        }
+                    }
                     
                     // 완전한 URL을 반환하면 그것을 사용, 아니면 wr_id로 구성
                     if (data.url && data.url.includes('wr_id=')) {
