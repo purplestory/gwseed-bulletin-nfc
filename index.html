@@ -130,13 +130,25 @@
             
             try {
                 const response = await fetch('/api/get-latest');
+                console.log('API 응답 상태:', response.status, response.ok);
+                
                 if (response.ok) {
                     const data = await response.json();
-                    if (data.wr_id) {
+                    console.log('API 응답 데이터:', data);
+                    
+                    // API가 완전한 URL을 반환하면 그것을 사용, 아니면 wr_id로 구성
+                    if (data.url && data.url.includes('wr_id=')) {
+                        bulletinUrl = data.url;
+                        console.log('API에서 받은 완전한 URL 사용:', bulletinUrl);
+                    } else if (data.wr_id) {
                         // wr_id가 있으면 특정 주보로 리다이렉트
                         bulletinUrl = `${baseUrl}&wr_id=${data.wr_id}`;
+                        console.log('wr_id로 구성한 URL:', bulletinUrl);
+                    } else {
+                        console.warn('wr_id가 없습니다. 주보 리스트 페이지로 이동합니다.');
                     }
-                    // wr_id가 없으면 기본 주보 리스트 페이지 사용
+                } else {
+                    console.error('API 응답 실패:', response.status, response.statusText);
                 }
             } catch (error) {
                 console.error('주보 정보 가져오기 실패, 주보 리스트 페이지로 이동:', error);
@@ -148,6 +160,8 @@
             if (linkElement) {
                 linkElement.href = bulletinUrl;
             }
+            
+            console.log('최종 리다이렉트 URL:', bulletinUrl);
             
             // 0.5초 후에 리다이렉트
             setTimeout(function() {
