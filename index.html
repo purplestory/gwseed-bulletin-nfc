@@ -100,7 +100,7 @@
         <p class="status-text">이번주 주보로 이동 중입니다...</p>
         
         <div class="thumbnail-container">
-            <img id="bulletin-thumbnail" src="assets/static_thumbnail.jpg" alt="높은뜻씨앗이되어교회 주보" class="bulletin-thumbnail">
+            <img id="bulletin-thumbnail" src="assets/thumbnail_2026.jpg" alt="높은뜻씨앗이되어교회 주보" class="bulletin-thumbnail">
         </div>
         
         <div class="loading"></div>
@@ -149,20 +149,8 @@
                     const data = await response.json();
                     console.log('API 응답 데이터:', data);
                     
-                    // 썸네일 이미지 설정 - 항상 새로운 썸네일 사용
-                    const thumbnailImg = document.getElementById('bulletin-thumbnail');
-                    if (thumbnailImg) {
-                        // 새 썸네일로 변경 (이미지가 로드된 후에만 변경하여 깜빡임 방지)
-                        const newThumbnail = new Image();
-                        newThumbnail.onload = function() {
-                            thumbnailImg.src = 'assets/thumbnail_2026.jpg';
-                            console.log('새 썸네일로 변경 완료');
-                        };
-                        newThumbnail.onerror = function() {
-                            console.log('새 썸네일 로드 실패, 기본 썸네일 유지');
-                        };
-                        newThumbnail.src = 'assets/thumbnail_2026.jpg';
-                    }
+                    // 썸네일 이미지는 이미 HTML에서 thumbnail_2026.jpg로 설정되어 있음
+                    // 추가 처리 불필요
                     
                     // 완전한 URL을 반환하면 그것을 사용, 아니면 wr_id로 구성
                     if (data.url && data.url.includes('wr_id=')) {
