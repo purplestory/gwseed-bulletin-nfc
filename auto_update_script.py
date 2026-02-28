@@ -356,8 +356,6 @@ def check_and_update_latest_bulletin():
             return False
     else:
         print("✅ 이미 최신 주보가 있습니다.")
-        # 최신 주보 정보 파일 업데이트
-        update_latest_bulletin_file(website_latest)
         return True
 
 if __name__ == "__main__":
